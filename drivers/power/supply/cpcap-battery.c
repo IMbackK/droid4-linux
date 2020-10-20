@@ -770,6 +770,13 @@ static int cpcap_battery_set_property(struct power_supply *psy,
 		ddata->charge_full = val->intval;
 
 		return 0;
+			case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
+		if (val->intval < 0)
+			return -EINVAL;
+
+		ddata->config.info.charge_full_design = val->intval;
+
+		return 0;
 	default:
 		return -EINVAL;
 	}
@@ -783,6 +790,7 @@ static int cpcap_battery_property_is_writeable(struct power_supply *psy,
 	switch (psp) {
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_VOLTAGE:
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
+	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
 		return 1;
 	default:
 		return 0;
