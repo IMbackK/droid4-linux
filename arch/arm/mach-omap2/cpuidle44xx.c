@@ -175,7 +175,7 @@ static int omap_enter_idle_coupled(struct cpuidle_device *dev,
 		if (mpuss_can_lose_context) {
 			error = cpu_cluster_pm_enter();
 			if (error) {
-				index = 0;
+				index = 1;
 				cx = state_ptr + index;
 				pwrdm_set_logic_retst(mpu_pd, cx->mpu_logic_state);
 				RCU_NONIDLE(omap_set_pwrdm_state(mpu_pd, cx->mpu_state));
