@@ -130,6 +130,8 @@
 			"Headphone Jack", "HSR",
 			"MICR", "Internal Mic";
 
+		has-hp-jack;
+
 		dais = <&mcbsp2_port>, <&mcbsp3_port>;
 	};
 
