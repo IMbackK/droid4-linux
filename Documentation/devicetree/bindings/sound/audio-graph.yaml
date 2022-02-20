@@ -38,6 +38,8 @@ properties:
     maxItems: 1
   mic-det-gpio:
     maxItems: 1
+  hp-det-gpio:
+    description: Set this properties if the device has a headphone jack to be reported on by a snd_soc_component
 
 required:
   - dais
