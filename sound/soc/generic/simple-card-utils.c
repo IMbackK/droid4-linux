@@ -683,6 +683,7 @@ int asoc_simple_init_jack(struct snd_soc_card *card,
 			  char *pin)
 {
 	struct device *dev = card->dev;
+	struct snd_soc_component *component;
 	enum of_gpio_flags flags;
 	char prop[128];
 	char *pin_name;
@@ -711,22 +712,30 @@ int asoc_simple_init_jack(struct snd_soc_card *card,
 	if (det == -EPROBE_DEFER)
 		return -EPROBE_DEFER;
 
-	if (gpio_is_valid(det)) {
-		sjack->pin.pin		= pin_name;
-		sjack->pin.mask		= mask;
+	sjack->pin.pin		= pin_name;
+	sjack->pin.mask		= mask;
 
+	if (gpio_is_valid(det)) {
 		sjack->gpio.name	= gpio_name;
 		sjack->gpio.report	= mask;
 		sjack->gpio.gpio	= det;
 		sjack->gpio.invert	= !!(flags & OF_GPIO_ACTIVE_LOW);
 		sjack->gpio.debounce_time = 150;
+	} else if (!of_property_read_bool(dev->of_node, prefix)) {
+		return 0;
+	}
 
-		snd_soc_card_jack_new(card, pin_name, mask,
-				      &sjack->jack,
-				      &sjack->pin, 1);
+	snd_soc_card_jack_new(card, pin_name, mask,
+					&sjack->jack,
+					&sjack->pin, 1);
 
+	if (gpio_is_valid(det)) {
 		snd_soc_jack_add_gpios(&sjack->jack, 1,
-				       &sjack->gpio);
+					&sjack->gpio);
+	}
+
+	for_each_card_components(card, component) {
+		snd_soc_component_set_jack(component, &sjack->jack, NULL);
 	}
 
 	return 0;
@@ -882,10 +891,15 @@ int asoc_simple_remove(struct platform_device *pdev)
 }
 EXPORT_SYMBOL_GPL(asoc_simple_remove);
 
-int asoc_graph_card_probe(struct snd_soc_card *card)
+int asoc_graph_dai_init(struct snd_soc_pcm_runtime *rtd)
 {
+	struct snd_soc_card *card = rtd->card;
 	struct asoc_simple_priv *priv = snd_soc_card_get_drvdata(card);
 	int ret;
+
+	ret = asoc_simple_dai_init(rtd);
+	if (ret < 0)
+		return ret;
 
 	ret = asoc_simple_init_hp(card, &priv->hp_jack, NULL);
 	if (ret < 0)
@@ -897,7 +911,7 @@ int asoc_graph_card_probe(struct snd_soc_card *card)
 
 	return 0;
 }
-EXPORT_SYMBOL_GPL(asoc_graph_card_probe);
+EXPORT_SYMBOL_GPL(asoc_graph_dai_init);
 
 int asoc_graph_is_ports0(struct device_node *np)
 {

@@ -34,8 +34,7 @@ static int custom_card_probe(struct snd_soc_card *card)
 
 	custom_priv->custom_params = 1;
 
-	/* you can use generic probe function */
-	return asoc_graph_card_probe(card);
+	return 0;
 }
 
 static int custom_hook_pre(struct asoc_simple_priv *priv)

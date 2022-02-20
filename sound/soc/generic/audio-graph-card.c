@@ -587,6 +587,8 @@ int audio_graph_parse_of(struct asoc_simple_priv *priv, struct device *dev)
 	if (ret < 0)
 		goto err;
 
+	asoc_simple_init_jack(card, &priv->hp_jack, true, "has-hp-jack", NULL);
+
 	devm_kfree(dev, li);
 	return 0;
 

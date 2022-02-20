@@ -194,7 +194,7 @@ int asoc_simple_init_priv(struct asoc_simple_priv *priv,
 			       struct link_info *li);
 int asoc_simple_remove(struct platform_device *pdev);
 
-int asoc_graph_card_probe(struct snd_soc_card *card);
+int asoc_graph_dai_init(struct snd_soc_pcm_runtime *rtd);
 int asoc_graph_is_ports0(struct device_node *port);
 
 #ifdef DEBUG

@@ -173,6 +173,27 @@ static int simple_parse_node(struct asoc_simple_priv *priv,
 	return 0;
 }
 
+static int simple_dai_init(struct snd_soc_pcm_runtime *rtd)
+{
+	struct snd_soc_card *card = rtd->card;
+	struct asoc_simple_priv *priv = snd_soc_card_get_drvdata(card);
+	int ret;
+
+	ret = asoc_simple_dai_init(rtd);
+	if (ret < 0)
+		return ret;
+
+	ret = asoc_simple_init_hp(card, &priv->hp_jack, PREFIX);
+	if (ret < 0)
+		return ret;
+
+	ret = asoc_simple_init_mic(card, &priv->mic_jack, PREFIX);
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+
 static int simple_link_init(struct asoc_simple_priv *priv,
 			    struct device_node *node,
 			    struct device_node *codec,
@@ -188,7 +209,7 @@ static int simple_link_init(struct asoc_simple_priv *priv,
 	if (ret < 0)
 		return 0;
 
-	dai_link->init			= asoc_simple_dai_init;
+	dai_link->init			= simple_dai_init;
 	dai_link->ops			= &simple_ops;
 
 	return asoc_simple_set_dailink_name(dev, dai_link, name);
@@ -611,22 +632,6 @@ static int simple_get_dais_count(struct asoc_simple_priv *priv,
 				    simple_count_dpcm);
 }
 
-static int simple_soc_probe(struct snd_soc_card *card)
-{
-	struct asoc_simple_priv *priv = snd_soc_card_get_drvdata(card);
-	int ret;
-
-	ret = asoc_simple_init_hp(card, &priv->hp_jack, PREFIX);
-	if (ret < 0)
-		return ret;
-
-	ret = asoc_simple_init_mic(card, &priv->mic_jack, PREFIX);
-	if (ret < 0)
-		return ret;
-
-	return 0;
-}
-
 static int asoc_simple_probe(struct platform_device *pdev)
 {
 	struct asoc_simple_priv *priv;
@@ -644,7 +649,6 @@ static int asoc_simple_probe(struct platform_device *pdev)
 	card = simple_priv_to_card(priv);
 	card->owner		= THIS_MODULE;
 	card->dev		= dev;
-	card->probe		= simple_soc_probe;
 	card->driver_name       = "simple-card";
 
 	li = devm_kzalloc(dev, sizeof(*li), GFP_KERNEL);
