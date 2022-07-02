@@ -612,15 +612,7 @@ static int cpcap_input_left_mux_put_enum(struct snd_kcontrol *kcontrol,
 
 static struct snd_soc_jack_pin headset_jack_pins[] = {
 	{
-		.pin = "Headset Right Playback Route",
-		.mask = SND_JACK_HEADPHONE,
-	},
-	{
-		.pin = "Headset Left Playback Route",
-		.mask = SND_JACK_HEADPHONE,
-	},
-	{
-		.pin = "Headphones",
+		.pin = "Headphone Jack",
 		.mask = SND_JACK_HEADPHONE,
 	}
 };
