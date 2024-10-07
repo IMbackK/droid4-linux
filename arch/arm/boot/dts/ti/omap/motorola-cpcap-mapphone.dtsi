@@ -72,6 +72,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
+			ext-amp-gpios = <&gpio6 31 GPIO_ACTIVE_HIGH>;
+
 			interrupts-extended = <&cpcap 9 0>;
 			interrupt-names = "hpplugged";
 

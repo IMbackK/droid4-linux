@@ -10,6 +10,7 @@
 
 #include <linux/module.h>
 #include <linux/regmap.h>
+#include <linux/gpio/consumer.h>
 #include <linux/platform_device.h>
 #include <linux/mfd/motorola-cpcap.h>
 #include <sound/core.h>
@@ -258,6 +259,8 @@ struct cpcap_audio {
 	int codec_clk_id;
 	int codec_freq;
 	int codec_format;
+
+	struct gpio_desc *ext_amp_gpio;
 };
 
 static int cpcap_st_workaround(struct snd_soc_dapm_widget *w,
@@ -1612,6 +1615,14 @@ static int cpcap_codec_probe(struct platform_device *pdev)
 	if (!cpcap)
 		return -ENOMEM;
 	dev_set_drvdata(&pdev->dev, cpcap);
+
+	dev_info(&pdev->dev, "Enableing external amp");
+	cpcap->ext_amp_gpio = devm_gpiod_get_index(&pdev->dev, "ext-amp", 0, GPIOD_OUT_HIGH);
+	if (IS_ERR(cpcap->ext_amp_gpio)) {
+		dev_info(&pdev->dev, "No external amp gpio avaiable");
+		cpcap->ext_amp_gpio = NULL;
+	}
+
 
 	ret = devm_snd_soc_register_component(&pdev->dev, &soc_codec_dev_cpcap,
 				      cpcap_dai, ARRAY_SIZE(cpcap_dai));
