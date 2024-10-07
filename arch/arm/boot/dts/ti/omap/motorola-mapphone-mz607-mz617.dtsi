@@ -71,6 +71,29 @@
 			};
 		};
 	};
+
+	soundcard {
+		compatible = "audio-graph-card2";
+		label = "Mapphone Audio";
+
+		widgets =
+			"Speaker", "Earpiece",
+			"Speaker", "Loudspeaker",
+			"Headphone", "Headphone Jack",
+			"Microphone", "Internal Mic";
+
+		routing =
+			"Earpiece", "EP",
+			"Loudspeaker", "SPKR",
+			"Headphone Jack", "HSL",
+			"Headphone Jack", "HSR",
+			"MICR", "Internal Mic";
+
+		links = <
+			&mcbsp2_port
+			&mcbsp3_port
+		>;
+	};
 };
 
 &dsi1 {
