@@ -604,6 +604,17 @@ static int cpcap_input_left_mux_put_enum(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
+static int cpcap_lineout_speaker_amp(struct snd_soc_dapm_widget* w, struct snd_kcontrol *kcontrol, int event)
+{
+	struct snd_soc_component *codec = snd_soc_dapm_to_component(w->dapm);
+	struct cpcap_audio *cpcap = snd_soc_component_get_drvdata(codec);
+
+
+	if (cpcap->ext_amp_gpio)
+		gpiod_set_value(cpcap->ext_amp_gpio, SND_SOC_DAPM_EVENT_ON(event));
+	return 0;
+}
+
 static struct snd_soc_jack_pin headset_jack_pins[] = {
 	{
 		.pin = "Headset Right Playback Route",
@@ -807,6 +818,8 @@ static const struct snd_soc_dapm_widget cpcap_dapm_widgets[] = {
 		CPCAP_REG_RXOA, CPCAP_BIT_A4_LINEOUT_R_EN, 0, NULL, 0),
 	SND_SOC_DAPM_PGA("Lineout Left PGA",
 		CPCAP_REG_RXOA, CPCAP_BIT_A4_LINEOUT_L_EN, 0, NULL, 0),
+	SND_SOC_DAPM_SPK("Lineout Speaker Amp",
+		cpcap_lineout_speaker_amp),
 	SND_SOC_DAPM_PGA("Headset Right PGA",
 		CPCAP_REG_RXOA, CPCAP_BIT_HS_R_EN, 0, NULL, 0),
 	SND_SOC_DAPM_PGA("Headset Left PGA",
@@ -926,6 +939,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"Speaker Left PGA", NULL, "Speaker Left Playback Route"},
 	{"Lineout Right PGA", NULL, "Lineout Right Playback Route"},
 	{"Lineout Left PGA", NULL, "Lineout Left Playback Route"},
+	{"Lineout Speaker Amp", NULL, "Lineout Right PGA"},
+	{"Lineout Speaker Amp", NULL, "Lineout Left PGA"},
 	{"Headset Right PGA", NULL, "Headset Right Playback Route"},
 	{"Headset Left PGA", NULL, "Headset Left Playback Route"},
 	{"EMU Right PGA", NULL, "EMU Right Playback Route"},
@@ -1616,13 +1631,13 @@ static int cpcap_codec_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	dev_set_drvdata(&pdev->dev, cpcap);
 
-	dev_info(&pdev->dev, "Enableing external amp");
-	cpcap->ext_amp_gpio = devm_gpiod_get_index(&pdev->dev, "ext-amp", 0, GPIOD_OUT_HIGH);
+	cpcap->ext_amp_gpio = devm_gpiod_get_index(&pdev->dev, "ext-amp", 0, GPIOD_OUT_LOW);
 	if (IS_ERR(cpcap->ext_amp_gpio)) {
 		dev_info(&pdev->dev, "No external amp gpio avaiable");
 		cpcap->ext_amp_gpio = NULL;
+	} else {
+		dev_info(&pdev->dev, "External amp gpio avaiable");
 	}
-
 
 	ret = devm_snd_soc_register_component(&pdev->dev, &soc_codec_dev_cpcap,
 				      cpcap_dai, ARRAY_SIZE(cpcap_dai));

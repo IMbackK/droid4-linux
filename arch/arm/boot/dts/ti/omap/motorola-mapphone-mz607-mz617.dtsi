@@ -74,17 +74,16 @@
 
 	soundcard {
 		compatible = "audio-graph-card2";
-		label = "Mapphone Audio";
+		label = "Mapphone Tablet Audio";
 
 		widgets =
-			"Speaker", "Earpiece",
 			"Speaker", "Loudspeaker",
 			"Headphone", "Headphone Jack",
 			"Microphone", "Internal Mic";
 
 		routing =
-			"Earpiece", "EP",
-			"Loudspeaker", "SPKR",
+			"Loudspeaker", "LINEL",
+			"Loudspeaker", "LINER",
 			"Headphone Jack", "HSL",
 			"Headphone Jack", "HSR",
 			"MICR", "Internal Mic";
